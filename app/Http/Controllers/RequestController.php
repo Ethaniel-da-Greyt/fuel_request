@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\FuelRequest;
 use App\Models\RequestModel;
+use Illuminate\Http\Request;
 
 class RequestController extends Controller
 {
@@ -23,19 +24,51 @@ class RequestController extends Controller
         return response()->json(['status' => 'success', 'message' => 'Request Successfully']);
     }
 
-    public function getAll()
+    //Admin Dashboard
+    public function getAll(Request $request)
     {
-        $fuel = RequestModel::where('is_deleted', 0)->whereIn('status', ['approve', 'reject', 'pending'])->get();
+        $search = $request->input('search');
 
-        if (!$fuel) {
-            return response()->json(['status' => 400, 'message' => 'No Fuel Request Found']);
+        $fuel = RequestModel::query()
+            ->where('is_deleted', 0)
+            ->where('status', 'pending')
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('request_id', 'like', "%{$search}%")
+                        ->orWhere('requestor_name', 'like', "%{$search}%")
+                        ->orWhere('vehicle', 'like', "%{$search}%");
+                });
+            })
+            ->get();
+
+
+        if ($fuel->isEmpty()) {
+            return response()->json(['status' => 400, 'error' => 'No Fuel Request Found']);
         }
+
+        // $date = date('Y-m-d h:i:s A', strtotime($fuel->date_requested));
+        $fuel->transform(function ($item) {
+            $item->formatted_date = date('F d, Y - h:i A', strtotime($item->date_requested));
+            return $item;
+        });
 
         return response()->json(['status' => 'success', 'data' => $fuel]);
     }
 
+    public function history()
+    {
+        $fuel = RequestModel::where('is_deleted', 0)->whereIn('status', ['approve', 'reject'])->get();
+
+        if (!$fuel) {
+            return response()->json(['status' => 400, 'message' => '']);
+        }
+
+        return response()->json(['status' => 200, 'data' => $fuel]);
+    }
+
     public function approve($id)
     {
+
         $fuel = RequestModel::where('is_deleted', 0)->where('status', 'pending')->where('id', $id)->first();
 
         if (!$fuel) {
@@ -43,6 +76,20 @@ class RequestController extends Controller
         }
 
         $data['status'] = 'approve';
+
+        $fuel->update($data);
+        return response()->json(['status' => 200,  'message' => 'approve successfully']);
+    }
+
+    public function reject($id)
+    {
+        $fuel = RequestModel::where('is_deleted', 0)->where('status', 'pending')->where('id', $id)->first();
+
+        if (!$fuel) {
+            return response()->json(['status' => 404, 'message' => 'Request Not Found']);
+        }
+
+        $data['status'] = 'reject';
 
         $fuel->update($data);
         return response()->json(['status' => 200,  'message' => 'approve successfully']);
