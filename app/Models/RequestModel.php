@@ -15,6 +15,7 @@ class RequestModel extends Model
         'requestor_head_office',
         'plate_no',
         'vehicle',
+        'fuel_type',
         'status',
         'is_deleted',
     ];

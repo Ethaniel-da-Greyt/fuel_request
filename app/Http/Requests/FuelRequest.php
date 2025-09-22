@@ -27,6 +27,7 @@ class FuelRequest extends FormRequest
             'requestor_head_office' => "required",
             'plate_no' => "required",
             'vehicle' => "required",
+            'fuel_type' => "required",
         ];
     }
 }

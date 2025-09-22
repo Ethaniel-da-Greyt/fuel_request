@@ -92,7 +92,7 @@ class RequestController extends Controller
         $data['status'] = 'reject';
 
         $fuel->update($data);
-        return response()->json(['status' => 200,  'message' => 'approve successfully']);
+        return response()->json(['status' => 200,  'message' => 'Rejected successfully']);
     }
 
     public function generateRequestId()
