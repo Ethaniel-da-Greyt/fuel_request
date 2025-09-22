@@ -12,5 +12,5 @@ Route::get('/', function () {
 Route::get('/testing', function () {
     Mail::to(["ethanielobordo2001@gmail.com", "etanyelgwapo@gmail.com", "jeromebringuez@gmail.com"])->send(new TestMail());
 
-    return "Email Sent";
+    return "Email has Sent";
 });
