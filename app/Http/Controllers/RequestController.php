@@ -38,8 +38,7 @@ class RequestController extends Controller
                         ->orWhere('requestor_name', 'like', "%{$search}%")
                         ->orWhere('vehicle', 'like', "%{$search}%");
                 });
-            })
-            ->get();
+            })->get();
 
 
         if ($fuel->isEmpty()) {
