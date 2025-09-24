@@ -1,9 +1,9 @@
 <?php
 
+use App\Http\Middleware\ForceJsonResponse;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -19,8 +19,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // ]);
 
         // or if you want it on api routes:
-        $middleware->group('api', [
-            EnsureFrontendRequestsAreStateful::class,
+        // $middleware->group('api', [
+        //     EnsureFrontendRequestsAreStateful::class,
+        // ]);
+
+        // Force JSON responses for API routes
+        $middleware->api(append: [
+            ForceJsonResponse::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SignUpRequest;
-use App\Models\User;
+use App\Models\Users;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class SignUpController extends Controller
@@ -14,9 +13,9 @@ class SignUpController extends Controller
     {
         try {
             $data = $request->validated();
-            $user = new User();
-            $check = $user->where("email", $data["email"])->first();
-            if ($check) {
+            $user = Users::where('email', $data['email'])->first();
+
+            if ($user) {
                 return response()->json(
                     [
                         "status" => 400,
@@ -26,10 +25,12 @@ class SignUpController extends Controller
                 );
             }
 
-            $user->password = Hash::make($data['password']);
-            $user->email = $data['email'];
-            $user->name = $data['name'];
-            $user->save();
+            $password = Hash::make($data['password']);
+            Users::create([
+                'email' => $data['email'],
+                'password' => $password,
+                'name' => $data['name'],
+            ]);
 
             return response()->json(
                 [

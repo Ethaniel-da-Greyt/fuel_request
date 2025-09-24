@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
-use App\Models\User;
-use Exception;
-use Illuminate\Http\Request;
+use App\Models\Users;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -13,16 +12,24 @@ class UserController extends Controller
     {
         try {
             $data = $request->validated();
-            $user = new User();
+            $user = Users::where("email", $data["email"])->first();
 
-            if (!$data) {
-                return response()->json(['status' => 400, 'error' => 'Unable to input correct data']);
+            if ($user) {
+                return response()->json(
+                    [
+                        'status' => 400,
+                        'error' => 'Email already taken'
+                    ]
+                );
             }
+            $user->create([
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'name' => $data['name'],
+            ]);
 
-            $user->create($data);
-
-            return response()->json(['status' => 200, 'message' => 'SignUp Successfully']);
-        } catch (Exception $e) {
+            return response()->json(['status' => 200, 'message' => 'User Created Successfully']);
+        } catch (\Exception $e) {
             return response()->json(['status' => 400, 'error' => $e->getMessage()]);
         }
     }
@@ -30,7 +37,7 @@ class UserController extends Controller
     public function update(UserRequest $request, $id)
     {
         try {
-            $user = new User();
+            $user = new Users();
             $data = $request->validated();
 
             if (!$data) {
@@ -38,7 +45,7 @@ class UserController extends Controller
             }
 
             $user->update($id, $data);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(['status' => 400, 'error' => $e->getMessage()]);
         }
     }
@@ -46,7 +53,7 @@ class UserController extends Controller
     public function destroy($id)
     {
         try {
-            $user = User::find($id);
+            $user = Users::find($id);
 
             if (!$user) {
                 return response()->json(['status' => 400, 'error' => 'User not Found']);
@@ -54,7 +61,7 @@ class UserController extends Controller
 
             $user->update(['isDelete' => 1]);
             return response()->json(['status' => 200, 'message' => 'User Deleted Successfully']);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(['status' => 400, 'error' => $e->getMessage()]);
         }
     }
@@ -62,13 +69,13 @@ class UserController extends Controller
     public function fetchUser($id)
     {
         try {
-            $user = User::find(intval($id));
+            $user = Users::find(intval($id));
             if (!$user) {
                 return response()->json(['status' => 400, 'error' => 'User not found']);
             }
 
             return response()->json(['status' => 200, 'user' => $user]);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(['status' => 400, 'error' => $e->getMessage()]);
         }
     }
@@ -76,14 +83,14 @@ class UserController extends Controller
     public function fetchAllUser()
     {
         try {
-            $user = User::all();
+            $user = Users::all();
 
             if (count($user) < 0) {
                 return response()->json(['status' => 400, 'error' => 'No Users found']);
             }
 
             return response()->json(['status' => 200, 'data' => $user]);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(['status' => 400, 'error' => $e->getMessage()]);
         }
     }

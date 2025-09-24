@@ -56,11 +56,16 @@ class RequestController extends Controller
 
     public function history()
     {
-        $fuel = RequestModel::where('is_deleted', 0)->whereIn('status', ['approve', 'reject'])->get();
+        $fuel = RequestModel::where('is_deleted', 0)->whereIn('status', ['approve', 'reject'])->orderBy('date_requested', 'DESC')->get();
 
         if (!$fuel) {
             return response()->json(['status' => 400, 'message' => '']);
         }
+
+        $fuel->transform(function ($item) {
+            $item->formatted_date = date('F d, Y - h:i A', strtotime($item->date_requested));
+            return $item;
+        });
 
         return response()->json(['status' => 200, 'data' => $fuel]);
     }
@@ -74,9 +79,10 @@ class RequestController extends Controller
             return response()->json(['status' => 404, 'message' => 'Request Not Found']);
         }
 
-        $data['status'] = 'approve';
 
-        $fuel->update($data);
+        $fuel->update([
+            'status' => "approve"
+        ]);
         return response()->json(['status' => 200,  'message' => 'approve successfully']);
     }
 

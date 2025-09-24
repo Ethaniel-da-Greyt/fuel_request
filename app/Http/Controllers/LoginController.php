@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
-use App\Models\User;
+use App\Models\Users;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
@@ -25,7 +24,7 @@ class LoginController extends Controller
                 );
             }
 
-            $user = User::find('email', $data['email']);
+            $user = Users::where('email', $data['email'])->first();
 
             if (!$user) {
                 return response()->json(
