@@ -45,12 +45,15 @@ class LoginController extends Controller
             }
 
             $token = $user->createToken('auth_token')->plainTextToken;
+
             return response()->json(
                 [
                     'status' => 200,
                     'access_token' => $token,
                     'token_type' => 'Bearer',
-                    'message' => 'Login Successfully'
+                    'message' => 'Login Successfully',
+                    'role' => $user['role'],
+                    'userId' => $user['id'],
                 ]
             );
         } catch (Exception $e) {

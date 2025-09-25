@@ -10,6 +10,7 @@ class RequestModel extends Model
     protected $fillable = [
         'request_id',
         'date_requested',
+        'requestor_id',
         'requestor_name',
         'requestor_office',
         'requestor_head_office',

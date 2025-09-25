@@ -29,17 +29,16 @@ class RequestController extends Controller
     {
         $search = $request->input('search');
 
-        $fuel = RequestModel::query()
-            ->where('is_deleted', 0)
-            ->where('status', 'pending')
-            ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('request_id', 'like', "%{$search}%")
-                        ->orWhere('requestor_name', 'like', "%{$search}%")
-                        ->orWhere('vehicle', 'like', "%{$search}%");
-                });
-            })->get();
+        $query = RequestModel::query();
+        $query->where('is_deleted', 0)
+            ->where('status', 'pending')->when($search, function ($q) use ($search) {
+                $q->where('is_deleted', 0)->where('status', ['pending', 'approve', 'reject'])->where('request_id', 'like', "%{$search}%")
+                    ->orWhere('requestor_name', 'like', "%{$search}%")
+                    ->orWhere('fuel_type', 'like', "%{$search}%")
+                    ->orWhere('vehicle', 'like', "%{$search}%");
+            });
 
+        $fuel = $query->get();
 
         if ($fuel->isEmpty()) {
             return response()->json(['status' => 400, 'error' => 'No Fuel Request Found']);

@@ -23,6 +23,7 @@ class FuelRequest extends FormRequest
     {
         return [
             'requestor_name' => "required",
+            'requestor_id' => "required",
             'requestor_office' => "required",
             'requestor_head_office' => "required",
             'plate_no' => "required",

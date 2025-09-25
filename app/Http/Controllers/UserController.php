@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserRequest;
 use App\Models\Users;
 use Illuminate\Support\Facades\Hash;
-
+    
 class UserController extends Controller
 {
     public function store(UserRequest $request)
