@@ -11,6 +11,12 @@ class RequestorController extends Controller
     public function getRequestByUser()
     {
         $user = Auth::user();
-        $request = RequestModel::where("requestor_id", $user->id)->where('is_deleted', 0)->first();
+        $request = RequestModel::where("requestor_id", $user->id)->where('is_deleted', 0)->get();
+
+        if (!$request) {
+            return response()->json(['status' => 401, 'error' => 'No Record Found.']);
+        }
+
+        return response()->json(['status' => 200, 'data' => $request]);
     }
 }

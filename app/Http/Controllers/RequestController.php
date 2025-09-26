@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\FuelRequest;
 use App\Models\RequestModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RequestController extends Controller
 {
@@ -15,6 +16,8 @@ class RequestController extends Controller
             return response()->json(['status' => 400, 'message' => 'Input Error']);
         }
 
+        $user = Auth::user();
+        $data['requestor_id'] = $user->id;
         $data['request_id'] = $this->generateRequestId();
         $data['date_requested'] = date('Y-m-d H:i:s');
         $fuel = RequestModel::create($data);
@@ -97,6 +100,21 @@ class RequestController extends Controller
 
         $fuel->update($data);
         return response()->json(['status' => 200,  'message' => 'Rejected successfully']);
+    }
+
+    public function cancel($id)
+    {
+        $fuel = RequestModel::where('is_deleted', 0)->where('status', 'pending')->where('id', $id)->first();
+
+        if (!$fuel) {
+            return response()->json(['status' => 404, 'error' => 'Failed to find record']);
+        }
+
+        $fuel->update([
+            'status' => 'canceled'
+        ]);
+
+        return response()->json(['status' => 200, 'message' => 'Request canceled Successfully']);
     }
 
     public function generateRequestId()
