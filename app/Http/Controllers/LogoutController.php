@@ -9,7 +9,7 @@ class LogoutController extends Controller
 {
     public function logout(Request $request)
     {
-        Auth::logout();
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json(
             [

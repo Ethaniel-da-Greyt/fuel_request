@@ -33,11 +33,16 @@ Route::post("/signup", [SignUpController::class, 'signUp']); //signup user
 
 Route::post("/login", [LoginController::class, 'login'])->name('login.user'); //login user
 
-Route::post('/logout', [LogoutController::class, 'logout'])->middleware('auth:sanctum'); //logout
 
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/getRecords', [RequestorController::class, 'getRequestByUser']);
     Route::post("/cancel/{id}", [RequestController::class, "cancel"]); //approve request api endpoint
     Route::post("/add", [RequestController::class, "add"]); //add request
+    Route::post("/delete/{id}", [RequestController::class, "deleteReq"]); //delete request
+    Route::post("/update/{id}", [RequestController::class, "updateReq"]); //update request
+
+
+    Route::post('/logout', [LogoutController::class, 'logout']); //logout
+
 });

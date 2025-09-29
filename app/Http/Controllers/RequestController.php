@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\FuelRequest;
+use App\Http\Requests\UpdateRequest;
 use App\Models\RequestModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -117,6 +118,31 @@ class RequestController extends Controller
         return response()->json(['status' => 200, 'message' => 'Request canceled Successfully']);
     }
 
+    public function deleteReq($id)
+    {
+        $fuel = RequestModel::where("is_deleted", 0)->where("request_id", $id)->first();
+
+        if (empty($fuel)) {
+            return response()->json(["status" => 404, "error" => "Request Not Found"]);
+        }
+
+        $fuel->update(['is_deleted' => 1]);
+
+        return response()->json(['status' => 200, 'message' => 'deleted successfully']);
+    }
+
+    public function updateReq($id, UpdateRequest $request)
+    {
+        $data = $request->validated();
+        $fuel = RequestModel::where('is_delete', 0)->where('request_id', $id)->first();
+
+        if (!$fuel) {
+            return response()->json(['status' => 404, 'error' => 'Request Not Found']);
+        }
+
+        $fuel->update($data);
+        return response()->json(['status' => 200, 'message' => 'updated successfully']);
+    }
     public function generateRequestId()
     {
         $prefix = 'FR' . date('ym');

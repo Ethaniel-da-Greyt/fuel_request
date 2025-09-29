@@ -17,6 +17,11 @@ class RequestorController extends Controller
             return response()->json(['status' => 401, 'error' => 'No Record Found.']);
         }
 
+        $request->transform(function ($item) {
+            $item->formatted_date = date('F d, Y - h:i A', strtotime($item->date_requested));
+            return $item;
+        });
+
         return response()->json(['status' => 200, 'data' => $request]);
     }
 }
