@@ -57,12 +57,25 @@ class RequestController extends Controller
         return response()->json(['status' => 'success', 'data' => $fuel]);
     }
 
-    public function history()
+    public function history(Request $request)
     {
-        $fuel = RequestModel::where('is_deleted', 0)->whereIn('status', ['approve', 'reject'])->orderBy('date_requested', 'DESC')->get();
+        $search = $request->input('search');
+
+        $query = RequestModel::query();
+        $query->where('is_deleted', 0)
+            ->whereIn('status', ['approve', 'reject'])->orderBy('date_requested', 'DESC')->when($search, function ($q) use ($search) {
+                $q->where(function ($q2) use ($search) {
+                    $q2->where('is_deleted', 0)->where('request_id', 'like', "%{$search}%")
+                        ->orWhere('requestor_name', 'like', "%{$search}%")
+                        ->orWhere('fuel_type', 'like', "%{$search}%")
+                        ->orWhere('vehicle', 'like', "%{$search}%");
+                });
+            });
+
+        $fuel = $query->get();
 
         if (!$fuel) {
-            return response()->json(['status' => 400, 'message' => '']);
+            return response()->json(['status' => 400, 'message' => 'No request found']);
         }
 
         $fuel->transform(function ($item) {
@@ -97,15 +110,15 @@ class RequestController extends Controller
             return response()->json(['status' => 404, 'message' => 'Request Not Found']);
         }
 
-        $data['status'] = 'reject';
-
-        $fuel->update($data);
+        $fuel->update([
+            'status' => 'reject'
+        ]);
         return response()->json(['status' => 200,  'message' => 'Rejected successfully']);
     }
 
     public function cancel($id)
     {
-        $fuel = RequestModel::where('is_deleted', 0)->where('status', 'pending')->where('id', $id)->first();
+        $fuel = RequestModel::where('is_deleted', 0)->where('status', 'pending')->where('request_id', $id)->first();
 
         if (!$fuel) {
             return response()->json(['status' => 404, 'error' => 'Failed to find record']);
@@ -116,6 +129,24 @@ class RequestController extends Controller
         ]);
 
         return response()->json(['status' => 200, 'message' => 'Request canceled Successfully']);
+    }
+
+    public function resubmit($id)
+    {
+        try {
+            $fuel = RequestModel::where('is_deleted', 0)->where('status', "canceled")->where("request_id", $id)->first();
+            if (!$fuel) {
+                return response()->json(["status" => 404, "error" => "Request Not Found"]);
+            }
+
+            $fuel->update([
+                "status" => "pending"
+            ]);
+
+            return response()->json(["status" => 200, "message" => "Request Resubmit"]);
+        } catch (\Exception $e) {
+            return response()->json(["status" => 500, "message" => $e->getMessage()]);
+        }
     }
 
     public function deleteReq($id)
@@ -134,7 +165,7 @@ class RequestController extends Controller
     public function updateReq($id, UpdateRequest $request)
     {
         $data = $request->validated();
-        $fuel = RequestModel::where('is_delete', 0)->where('request_id', $id)->first();
+        $fuel = RequestModel::where('is_deleted', 0)->where('request_id', $id)->first();
 
         if (!$fuel) {
             return response()->json(['status' => 404, 'error' => 'Request Not Found']);

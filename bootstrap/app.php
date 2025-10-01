@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\ForceJsonResponse;
+use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,6 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // $middleware->group('api', [
         //     EnsureFrontendRequestsAreStateful::class,
         // ]);
+
+        $middleware->alias(['role' => RoleMiddleware::class]);
 
         // Force JSON responses for API routes
         $middleware->api(append: [
