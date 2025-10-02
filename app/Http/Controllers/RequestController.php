@@ -176,7 +176,7 @@ class RequestController extends Controller
     }
     public function generateRequestId()
     {
-        $prefix = 'FR' . date('ym');
+        $prefix = 'FR' . date('ym'); //FR2510
 
         $lastRequest = RequestModel::where('request_id', 'like', $prefix . '%')
             ->orderBy('request_id', 'desc')
@@ -189,8 +189,8 @@ class RequestController extends Controller
             $nextNumber = 1;
         }
 
-        $nextNumberFormatted = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        $nextNumberFormatted = str_pad($nextNumber, 3, '0', STR_PAD_LEFT); //001
 
-        return $prefix . '-' . $nextNumberFormatted;
+        return $prefix . '-' . $nextNumberFormatted; //FR2510-001
     }
 }
