@@ -20,6 +20,11 @@ Route::post("/login", [LoginController::class, 'login'])->name('login.user'); //
 
 Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('forgot.password');
+Route::post("/delete-multi", [RequestController::class, "deleteMulti"]); //delete request sample
+Route::post("/delete-restore", [RequestController::class, "restore"]); //delete request sample
+// Route::get("/fuel-requests-sample", [RequestController::class, "getAll"])->name("fuel.request"); //fuel request record fetch all
+Route::get("/fuel-requests-sample", [RequestController::class, "getAllDeleted"])->name("fuel.request"); //fuel request record fetch all
+
 
 
 

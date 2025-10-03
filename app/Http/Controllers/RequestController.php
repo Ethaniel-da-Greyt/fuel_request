@@ -162,6 +162,59 @@ class RequestController extends Controller
         return response()->json(['status' => 200, 'message' => 'deleted successfully']);
     }
 
+    public function deleteMulti(Request $request)
+    {
+        $data = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'string'
+        ]);
+
+        $fuel = RequestModel::where("is_deleted", 0)->whereIn("request_id", $data['ids'])->get();
+
+        if ($fuel->isEmpty()) {
+            return response()->json(["status" => 404, "error" => "Request Not Found"]);
+        }
+
+        RequestModel::whereIn('request_id', $data['ids'])->update(['is_deleted' => 1]);
+
+        return response()->json(['status' => 200, 'message' => 'deleted successfully']);
+    }
+    public function restore(Request $request)
+    {
+        $data = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'string'
+        ]);
+
+        $fuel = RequestModel::where("is_deleted", 1)->whereIn("request_id", $data['ids'])->get();
+
+        if ($fuel->isEmpty()) {
+            return response()->json(["status" => 404, "error" => "Request Not Found"]);
+        }
+
+        RequestModel::whereIn('request_id', $data['ids'])->update(['is_deleted' => 0]);
+
+        return response()->json(['status' => 200, 'message' => 'deleted successfully']);
+    }
+    public function getAllDeleted(Request $request)
+    {
+
+
+        $fuel = RequestModel::where("is_deleted", 1)->get();
+
+        if ($fuel->isEmpty()) {
+            return response()->json(['status' => 400, 'error' => 'No Fuel Request Found']);
+        }
+
+        // $date = date('Y-m-d h:i:s A', strtotime($fuel->date_requested));
+        $fuel->transform(function ($item) {
+            $item->formatted_date = date('F d, Y - h:i A', strtotime($item->date_requested));
+            return $item;
+        });
+
+        return response()->json(['status' => 'success', 'data' => $fuel]);
+    }
+
     public function updateReq($id, UpdateRequest $request)
     {
         $data = $request->validated();
